@@ -13,11 +13,23 @@ namespace TCPClientExample
     {
         static void Main(string[] args)
         {
-            //make sure the server is running before we try to connect
-            //DO THIS ONLY IN DEBUG
-            Thread.Sleep(500);
+            const string argPrefixIp = "ip=";
+            const string argPrefixPort = "port=";
 
-            using (TcpClient client = new TcpClient("127.0.0.1", MiniSQLEngine.Network.TCPPort))
+            string ip = null;
+            int port = 0;
+            foreach (string arg in args)
+            {
+                if (arg.StartsWith(argPrefixIp)) ip = arg.Substring(argPrefixIp.Length);
+                else if (arg.StartsWith(argPrefixPort)) port = int.Parse(arg.Substring(argPrefixPort.Length));
+            }
+            if (ip == null || port == 0)
+            {
+                Console.WriteLine("ERROR. Usage: TCPClient ip=<ip> port=<port>");
+                return;
+            }
+
+            using (TcpClient client = new TcpClient(ip, port))
             {
                 NetworkStream networkStream = client.GetStream();
 
@@ -31,6 +43,8 @@ namespace TCPClientExample
 
                     int readBytes = networkStream.Read(inputBuffer, 0, 1024);
                     Console.WriteLine("Response received: " + Encoding.ASCII.GetString(inputBuffer,0,readBytes));
+
+                    Thread.Sleep(2000);
                 }
                 networkStream.Write(endMessage, 0, endMessage.Length);
             }

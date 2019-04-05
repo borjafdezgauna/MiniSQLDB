@@ -13,9 +13,23 @@ namespace TCPServerExample
     {
         static void Main(string[] args)
         {
-            IPAddress localAddress = IPAddress.Parse("127.0.0.1");
-            TcpListener listener = new TcpListener(localAddress, MiniSQLEngine.Network.TCPPort);
+            const string argPrefixPort = "port=";
+
+            int port = 0;
+            foreach (string arg in args)
+            {
+                if (arg.StartsWith(argPrefixPort)) port = int.Parse(arg.Substring(argPrefixPort.Length));
+            }
+            if (port == 0)
+            {
+                Console.WriteLine("ERROR. Usage: TCPClient ip=<ip> port=<port>");
+                return;
+            }
+
+            TcpListener listener = new TcpListener(IPAddress.Any, port);
             listener.Start();
+
+            Console.WriteLine("Server listening for clients");
 
             while (true)
             {
